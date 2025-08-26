@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uk" allow="camera">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Склади прапор України</title>
 
-  <!-- Використовуємо стабільні CDN -->
+  <!-- CDN: стабільні посилання -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
@@ -14,23 +14,38 @@
     body, html {
       margin: 0;
       padding: 0;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: #e0f7fa;
       overflow: hidden;
-      height: 100%;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #e0f7fa; /* фон сторінки (не AR-сцени) */
     }
 
-    #ui-overlay {
+    /* Текстова підказка — прозорий фон, чіткий текст */
+    .overlay {
       position: absolute;
       top: 20px;
       width: 100%;
       text-align: center;
-      color: #1565c0;
-      font-size: 24px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
       pointer-events: none;
       z-index: 10;
+
+      /* 🔥 Прозорий фон */
+      background: transparent;
+      border: none;
+      box-shadow: none;
+
+      /* Чорна обводка для читабельності */
+      text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         0    0   4px #000;
     }
 
+    /* Екран успіху */
     #success-screen {
       display: none;
       position: absolute;
@@ -47,6 +62,7 @@
       font-size: 40px;
       color: #1565c0;
       animation: pop-in 1s;
+      margin: 10px 0;
     }
 
     .star-animation {
@@ -65,6 +81,7 @@
       cursor: pointer;
     }
 
+    /* Анімації */
     @keyframes float {
       0% { transform: translateY(0); }
       100% { transform: translateY(-20px); }
@@ -76,15 +93,15 @@
     }
 
     @keyframes pop-in {
-      0% { opacity: 0; transform: scale(0.5); }
+      0% { opacity: 0; transform: scale(0.8); }
       100% { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
 
-  <!-- Інструкція -->
-  <div id="ui-overlay">📱 Наведи на маркер — активується задня камера!</div>
+  <!-- Підказка: прозорий фон, чіткий текст -->
+  <div class="overlay">📱 Наведи на маркер Hiro!</div>
 
   <!-- Екран успіху -->
   <div id="success-screen">
@@ -94,20 +111,20 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- AR Сцена з примусовим використанням задньої камери -->
+  <!-- AR Сцена -->
   <a-scene
     embedded
     arjs="trackingMethod: best; debugUIEnabled: false; canvasWidth: 480; canvasHeight: 640;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
   >
-    <!-- Важливо: додаємо video-src для вибору камери -->
+    <!-- Камера з примусовим використанням задньої -->
     <a-camera
       rotation-reader
       arjs-camera
-      video-src="default-camera"
     ></a-camera>
 
+    <!-- Маркер Hiro -->
     <a-marker preset="hiro">
       <!-- Блоки прапора -->
       <a-box
@@ -126,7 +143,7 @@
         class="aframe-draggable"
       ></a-box>
 
-      <!-- Цільові зони -->
+      <!-- Приховані цілі -->
       <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
       <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
     </a-marker>
@@ -136,7 +153,7 @@
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
-    // Перевірка позиції блоків
+    // Перевірка, чи блоки на місці
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -154,7 +171,7 @@
       const distYellow = posYellow.distanceTo(posTgtYellow);
 
       if (distBlue < 0.2 && distYellow < 0.2) {
-        document.getElementById('ui-overlay').style.display = 'none';
+        document.querySelector('.overlay').style.display = 'none';
         document.getElementById('success-screen').style.display = 'flex';
         document.getElementById('success-sound').play();
       }
@@ -171,38 +188,20 @@
       document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
       document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
       document.getElementById('success-screen').style.display = 'none';
-      document.getElementById('ui-overlay').style.display = 'block';
+      document.querySelector('.overlay').style.display = 'block';
     }
 
-    // 🔥 Головне: примусово вмикаємо задню камеру
-    AFRAME.registerComponent('arjs-camera', {
-      init: function () {
-        const sceneEl = this.el.sceneEl;
-        sceneEl.addEventListener('loaded', () => {
-          const video = sceneEl.renderer.domElement;
-          if (video && video.srcObject && video.srcObject.getVideoTracks) {
-            const track = video.srcObject.getVideoTracks()[0];
-            if (track && track.getSettings) {
-              const settings = track.getSettings();
-              // Переконуємося, що використовується задня камера
-              console.log('📹 Використовується камера:', settings ? settings.facingMode : 'невідомо');
-            }
-          }
+    // 🔥 Вимагаємо задню камеру
+    (async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" } // задня камера
         });
+      } catch (err) {
+        console.warn("Не вдалося ввімкнути задню камеру:", err);
       }
-    });
-
-    // Додатково: намагаємося вибрати задню камеру через constraints
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" } // environment = задня камера
-    }).then(stream => {
-      const video = document.querySelector('a-scene a-camera');
-      if (video) {
-        video.setAttribute('src', URL.createObjectURL(stream));
-      }
-    }).catch(err => {
-      console.warn("Не вдалося ввімкнути задню камеру:", err);
-    });
+    })();
   </script>
+
 </body>
 </html>
