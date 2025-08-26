@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk" allow="camera">
 <head>
@@ -5,7 +6,7 @@
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Склади прапор України</title>
 
-  <!-- ✅ Виправлені посилання (без пробілів) -->
+  <!-- ✅ Виправлені посилання -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
@@ -82,7 +83,7 @@
 </head>
 <body>
 
-  <div class="overlay">📱 Наведи на маркер! Дозволь камеру.</div>
+  <div class="overlay">📱 Наведи на маркер! Перемісти блоки: блакитний вгору, жовтий униз.</div>
 
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
@@ -91,7 +92,6 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- ✅ Виправлено: emitevents, a-camera, video-src -->
   <a-scene
     embedded
     arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;"
@@ -116,14 +116,16 @@
 
   <script>
     const scanText = document.querySelector('.overlay');
+    const marker = document.querySelector('a-marker');
 
     // Події маркера
-    document.querySelector('a-marker').addEventListener('markerFound', () => {
-      scanText.style.display = 'none';
+    marker.addEventListener('markerFound', () => {
+      scanText.style.display = 'block'; // Показуємо підказку, коли маркер знайдено
     });
 
-    document.querySelector('a-marker').addEventListener('markerLost', () => {
-      scanText.style.display = 'block';
+    marker.addEventListener('markerLost', () => {
+      scanText.style.display = 'block'; // Показуємо підказку, якщо маркер втрачено
+      document.getElementById('success-screen').style.display = 'none'; // Ховаємо екран успіху
     });
 
     function checkPosition() {
@@ -142,7 +144,7 @@
       const distBlue = posBlue.distanceTo(posTgtBlue);
       const distYellow = posYellow.distanceTo(posTgtYellow);
 
-      if (distBlue < 0.2 && distYellow < 0.2) {
+      if (distBlue < 0.3 && distYellow < 0.3) { // Збільшено відстань для легшого попадання
         scanText.style.display = 'none';
         document.getElementById('success-screen').style.display = 'flex';
         const sound = document.getElementById('success-sound');
@@ -160,6 +162,13 @@
       document.getElementById('success-screen').style.display = 'none';
       scanText.style.display = 'block';
     }
+
+    // Фікс висоти для мобільних
+    function fixHeight() {
+      document.body.style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('resize', fixHeight);
+    fixHeight();
   </script>
 
 </body>
