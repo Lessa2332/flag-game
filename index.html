@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk" allow="camera *">
 <head>
@@ -16,10 +17,9 @@
       padding: 0;
       overflow: hidden;
       font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: #e0f7fa; /* фон сторінки (не AR-сцени) */
+      background: #e0f7fa;
     }
 
-    /* Текстова підказка — прозорий фон, чіткий текст */
     .overlay {
       position: absolute;
       top: 20px;
@@ -30,13 +30,9 @@
       font-weight: bold;
       pointer-events: none;
       z-index: 10;
-
-      /* 🔥 Прозорий фон */
       background: transparent;
       border: none;
       box-shadow: none;
-
-      /* Чорна обводка для читабельності */
       text-shadow:
         -1px -1px 0 #000,
          1px -1px 0 #000,
@@ -45,7 +41,6 @@
          0    0   4px #000;
     }
 
-    /* Екран успіху */
     #success-screen {
       display: none;
       position: absolute;
@@ -81,36 +76,18 @@
       cursor: pointer;
     }
 
-    /* Анімації */
-    @keyframes float {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-20px); }
-    }
+    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes pop-in {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    /* Адаптивність для менших екранів */
     @media (max-width: 600px) {
-      .overlay {
-        font-size: 20px;
-      }
+      .overlay { font-size: 20px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Підказка: прозорий фон, чіткий текст -->
   <div class="overlay">📱 Наведи на маркер Hiro! Активуй задню камеру в налаштуваннях браузера, якщо потрібно.</div>
-
-  <!-- Екран успіху -->
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
@@ -118,49 +95,24 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- AR Сцена -->
   <a-scene
     embedded
-    arjs="trackingMethod: best; debugUIEnabled: true; canvasWidth: 480; canvasHeight: 640;"
+    arjs="trackingMethod: best; debugUIEnabled: true; sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
   >
-    <!-- Камера з примусовим використанням задньої -->
-    <a-camera
-      rotation-reader
-      arjs-camera
-    ></a-camera>
-
-    <!-- Маркер Hiro -->
+    <a-camera rotation-reader arjs-camera></a-camera>
     <a-marker preset="hiro">
-      <!-- Блоки прапора -->
-      <a-box
-        id="blue-part"
-        position="0.5 0.5 0"
-        width="1" height="0.3" depth="0.1"
-        color="#0057b7"
-        class="aframe-draggable"
-      ></a-box>
-
-      <a-box
-        id="yellow-part"
-        position="-0.5 0.5 0"
-        width="1" height="0.3" depth="0.1"
-        color="#ffd700"
-        class="aframe-draggable"
-      ></a-box>
-
-      <!-- Приховані цілі -->
+      <a-box id="blue-part" position="0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#0057b7" class="aframe-draggable"></a-box>
+      <a-box id="yellow-part" position="-0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#ffd700" class="aframe-draggable"></a-box>
       <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
       <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
     </a-marker>
   </a-scene>
 
-  <!-- Звук успіху -->
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
-    // Перевірка, чи блоки на місці
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -184,11 +136,9 @@
       }
     }
 
-    // Оптимізована перевірка: після перетягування та періодично (але рідше)
     document.addEventListener('dragend', () => setTimeout(checkPosition, 100));
-    setInterval(checkPosition, 1000); // Збільшено інтервал для оптимізації
+    setInterval(checkPosition, 1000);
 
-    // Скидання гри
     function resetGame() {
       document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
       document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
@@ -196,7 +146,6 @@
       document.querySelector('.overlay').style.display = 'block';
     }
 
-    // 🔥 Вимагаємо задню камеру з обробкою помилок
     (async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert("Ваш пристрій або браузер не підтримує доступ до камери. Спробуйте інший браузер.");
@@ -204,16 +153,21 @@
       }
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" } // задня камера
-        });
-        // Зупиняємо потік, бо AR.js сам обробить камеру
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         stream.getTracks().forEach(track => track.stop());
       } catch (err) {
         console.warn("Не вдалося ввімкнути задню камеру:", err);
-        alert("Будь ласка, дозвольте доступ до задньої камери для роботи AR. Якщо проблема триває, перевірте налаштування браузера.");
+        alert("Будь ласка, дозвольте доступ до задньої камери для роботи AR. Перевірте налаштування браузера.");
       }
     })();
+
+    // Додаткова відладка
+    window.addEventListener('load', () => {
+      console.log("Сторінка завантажена. Перевірте консоль на помилки!");
+      if (!document.querySelector('a-scene').components.arjs) {
+        console.error("AR.js не ініціалізовано. Перевірте підключення бібліотек!");
+      }
+    });
   </script>
 
 </body>
