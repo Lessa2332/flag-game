@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Склади прапор України</title>
+  <title>Обирай кольори прапора України</title>
 
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
@@ -71,6 +71,16 @@
       border-radius: 30px;
       cursor: pointer;
     }
+    .color-option {
+      position: absolute;
+      width: 1.2m;
+      height: 0.4m;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .color-option:hover {
+      transform: scale(1.1);
+    }
     @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
@@ -81,12 +91,12 @@
 </head>
 <body>
 
-  <div class="overlay">📱 Наведи на маркер! Перемісти блоки: блакитний вгору, жовтий униз.</div>
+  <div class="overlay">📱 Наведи на маркер! Обирай кольори: спочатку блакитний, потім жовтий.</div>
 
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
-    <p style="font-size: 24px;">Ти склав(ла) прапор України! 🇺🇦</p>
+    <p style="font-size: 24px;">Ти правильно обрав кольори прапора! 🇺🇦</p>
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
@@ -104,10 +114,10 @@
     ></a-camera>
 
     <a-marker preset="hiro">
-      <a-box id="blue-part" position="0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#0057b7" class="aframe-draggable"></a-box>
-      <a-box id="yellow-part" position="-0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#ffd700" class="aframe-draggable"></a-box>
-      <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
-      <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
+      <a-plane id="blue-option" class="color-option" position="0 0.4 0" width="1.2" height="0.4" color="#0057b7" event-set__click="setAttribute('visible', false); _event: chooseColor; data: blue;"></a-plane>
+      <a-plane id="yellow-option" class="color-option" position="0 0.0 0" width="1.2" height="0.4" color="#ffd700" event-set__click="setAttribute('visible', false); _event: chooseColor; data: yellow;"></a-plane>
+      <a-plane id="green-option" class="color-option" position="0 -0.4 0" width="1.2" height="0.4" color="#00FF00" event-set__click="setAttribute('visible', false); _event: chooseColor; data: green;"></a-plane>
+      <a-plane id="pink-option" class="color-option" position="0 -0.8 0" width="1.2" height="0.4" color="#FF69B4" event-set__click="setAttribute('visible', false); _event: chooseColor; data: pink;"></a-plane>
     </a-marker>
   </a-scene>
 
@@ -117,71 +127,56 @@
     const scanText = document.querySelector('.overlay');
     const marker = document.querySelector('a-marker');
     const arScene = document.getElementById('arScene');
-    let isInitialized = false;
+    let selectedColors = [];
 
     // Ініціалізація після завантаження сцени
     arScene.addEventListener('loaded', () => {
-      isInitialized = true;
       scanText.style.display = 'block';
-      console.log("Сцена ініціалізована, камера має бути активна.");
+      document.getElementById('success-screen').style.display = 'none';
+      console.log("Сцена ініціалізована.");
     });
 
     // Події маркера
     marker.addEventListener('markerFound', () => {
-      scanText.style.display = 'block'; // Показуємо підказку при знаходженні маркера
-      console.log("Маркер знайдено, камера працює.");
+      scanText.style.display = 'block';
+      document.querySelectorAll('.color-option').forEach(option => option.setAttribute('visible', true));
+      selectedColors = []; // Скидаємо вибір при знаходженні маркера
+      console.log("Маркер знайдено.");
     });
 
     marker.addEventListener('markerLost', () => {
-      scanText.style.display = 'block'; // Показуємо підказку при втраті маркера
-      document.getElementById('success-screen').style.display = 'none'; // Ховаємо екран успіху
+      scanText.style.display = 'block';
+      document.getElementById('success-screen').style.display = 'none';
       console.log("Маркер втрачено.");
     });
 
-    function checkPosition() {
-      if (!isInitialized) return; // Чекаємо ініціалізації
+    // Обробка вибору кольору
+    arScene.addEventListener('chooseColor', (e) => {
+      const color = e.detail.data;
+      selectedColors.push(color);
+      console.log(`Обрано колір: ${color}, послідовність: ${selectedColors}`);
 
-      const blue = document.getElementById('blue-part');
-      const yellow = document.getElementById('yellow-part');
-      const targetBlue = document.getElementById('target-blue');
-      const targetYellow = document.getElementById('target-yellow');
-
-      if (!blue || !yellow || !targetBlue || !targetYellow) {
-        console.log("Елементи не знайдено.");
-        return;
+      if (selectedColors.length === 2) {
+        if (selectedColors[0] === 'blue' && selectedColors[1] === 'yellow') {
+          scanText.style.display = 'none';
+          document.getElementById('success-screen').style.display = 'flex';
+          document.getElementById('success-sound').play().catch(e => console.log("Звук заблоковано", e));
+          console.log("Успіх! Правильний порядок.");
+        } else {
+          alert("Спробуй ще раз! Обирай спочатку блакитний, потім жовтий.");
+          selectedColors = []; // Скидаємо при неправильному виборі
+          document.querySelectorAll('.color-option').forEach(option => option.setAttribute('visible', true));
+        }
       }
-
-      const posBlue = blue.object3D.position;
-      const posYellow = yellow.object3D.position;
-      const posTgtBlue = targetBlue.object3D.position;
-      const posTgtYellow = targetYellow.object3D.position;
-
-      const distBlue = posBlue.distanceTo(posTgtBlue);
-      const distYellow = posYellow.distanceTo(posTgtYellow);
-
-      console.log(`Дистанція: блакитний=${distBlue.toFixed(2)}, жовтий=${distYellow.toFixed(2)}`);
-
-      if (distBlue < 0.3 && distYellow < 0.3) {
-        scanText.style.display = 'none';
-        document.getElementById('success-screen').style.display = 'flex';
-        const sound = document.getElementById('success-sound');
-        sound.play().catch(e => console.log("Звук заблоковано", e));
-        console.log("Успіх! Блоки на місці.");
-      }
-    }
-
-    // Перевірка позиції
-    document.addEventListener('dragend', () => setTimeout(checkPosition, 100));
-    setInterval(checkPosition, 300);
+    });
 
     function resetGame() {
-      // Скидаємо позиції блоків
-      document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
-      document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
+      selectedColors = [];
       document.getElementById('success-screen').style.display = 'none';
       scanText.style.display = 'block';
+      document.querySelectorAll('.color-option').forEach(option => option.setAttribute('visible', true));
 
-      // Спробуємо переініціалізувати камеру
+      // Спроба переініціалізації камери
       const camera = document.querySelector('a-camera');
       if (camera) {
         camera.components['arjs-camera'].initCamera();
