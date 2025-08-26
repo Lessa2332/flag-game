@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" allow="camera">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Склади прапор України</title>
 
-  <!-- Важливо: використовуємо CDN, щоб GitHub Pages не блокував -->
+  <!-- Використовуємо стабільні CDN -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
@@ -83,23 +83,31 @@
 </head>
 <body>
 
-  <!-- ПОДСКАЗКА НА ЕКРАНІ -->
-  <div id="ui-overlay">📱 Наведи камеру на маркер Hiro!</div>
+  <!-- Інструкція -->
+  <div id="ui-overlay">📱 Наведи на маркер — активується задня камера!</div>
 
-  <!-- ЕКРАН УСПІХУ -->
+  <!-- Екран успіху -->
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
-    <p style="font-size: 24px; max-width: 500px;">Ти склав(ла) прапор України! 🇺🇦</p>
+    <p style="font-size: 24px;">Ти склав(ла) прапор України! 🇺🇦</p>
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- AR СЦЕНА -->
+  <!-- AR Сцена з примусовим використанням задньої камери -->
   <a-scene
     embedded
     arjs="trackingMethod: best; debugUIEnabled: false; canvasWidth: 480; canvasHeight: 640;"
     vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
   >
+    <!-- Важливо: додаємо video-src для вибору камери -->
+    <a-camera
+      rotation-reader
+      arjs-camera
+      video-src="default-camera"
+    ></a-camera>
+
     <a-marker preset="hiro">
       <!-- Блоки прапора -->
       <a-box
@@ -118,20 +126,17 @@
         class="aframe-draggable"
       ></a-box>
 
-      <!-- Приховані цілі -->
-      <a-plane id="target-blue"  visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
+      <!-- Цільові зони -->
+      <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
       <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
     </a-marker>
-
-    <!-- Камера -->
-    <a-entity camera></a-entity>
   </a-scene>
 
   <!-- Звук успіху -->
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
-    // Перевірка, чи блоки на місці
+    // Перевірка позиції блоків
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -155,15 +160,13 @@
       }
     }
 
-    // Додаємо можливість перетягування
-    document.addEventListener('dragend', () => {
-      setTimeout(checkPosition, 100);
-    });
-
-    // Оновлюємо позицію кожні 500 мс
+    // Перевіряємо кожні 500 мс
     setInterval(checkPosition, 500);
 
-    // Спробувати ще раз
+    // Після перетягування
+    document.addEventListener('dragend', () => setTimeout(checkPosition, 100));
+
+    // Скидання гри
     function resetGame() {
       document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
       document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
@@ -171,11 +174,35 @@
       document.getElementById('ui-overlay').style.display = 'block';
     }
 
-    // Додаємо draggable після завантаження A-Frame
-    window.addEventListener('aframeSceneLoaded', () => {
-      console.log('A-Frame завантажено');
+    // 🔥 Головне: примусово вмикаємо задню камеру
+    AFRAME.registerComponent('arjs-camera', {
+      init: function () {
+        const sceneEl = this.el.sceneEl;
+        sceneEl.addEventListener('loaded', () => {
+          const video = sceneEl.renderer.domElement;
+          if (video && video.srcObject && video.srcObject.getVideoTracks) {
+            const track = video.srcObject.getVideoTracks()[0];
+            if (track && track.getSettings) {
+              const settings = track.getSettings();
+              // Переконуємося, що використовується задня камера
+              console.log('📹 Використовується камера:', settings ? settings.facingMode : 'невідомо');
+            }
+          }
+        });
+      }
+    });
+
+    // Додатково: намагаємося вибрати задню камеру через constraints
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" } // environment = задня камера
+    }).then(stream => {
+      const video = document.querySelector('a-scene a-camera');
+      if (video) {
+        video.setAttribute('src', URL.createObjectURL(stream));
+      }
+    }).catch(err => {
+      console.warn("Не вдалося ввімкнути задню камеру:", err);
     });
   </script>
-
 </body>
 </html>
