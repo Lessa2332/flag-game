@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>notepad</title>
+</head>
+<style type="text/css">
+ol,ul{
+display:block;
+list-style-type:none;
+margin:3px;
+}
+</style><body>
+<div>&lt;!DOCTYPE html&gt;<br>
+&lt;html lang="uk"&gt;<br>
+&lt;head&gt;<br>
+&nbsp; &lt;meta charset="utf-8"&gt;<br>
+&nbsp; &lt;meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;<br>
+&nbsp; &lt;title&gt;AR &#1050;&#1072;&#1084;&#1077;&#1088;&#1072;&lt;/title&gt;<br>
+&nbsp; &lt;script src="https://aframe.io/releases/1.6.0/aframe.min.js"&gt;&lt;/script&gt;<br>
+&nbsp; &lt;script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"&gt;&lt;/script&gt;<br>
+&nbsp; &lt;style&gt;<br>
+&nbsp;&nbsp;&nbsp; html, body {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; margin: 0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; padding: 0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 100%;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; height: 100%;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; overflow: hidden;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; touch-action: none;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-family: Arial, sans-serif;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; a-scene {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 100% !important;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; height: 100% !important;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; top: 0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 0;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; #scanText {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; top: 50%;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 50%;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; transform: translate(-50%, -50%);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color: #FFD700;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-size: 2em;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-weight: bold;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-shadow: 2px 2px 6px #000;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; z-index: 10;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-align: center;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 90%;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; #smartLessaBtn {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bottom: 20px;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 50%;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; transform: translateX(-50%);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; background: #ff0044;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color: white;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; padding: 14px 24px;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; border-radius: 30px;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-size: 1.1em;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-weight: bold;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-decoration: none;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; z-index: 10;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; box-shadow: 0 4px 8px rgba(0,0,0,0.3);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; #smartLessaBtn:hover {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; background: #cc0036;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp; &lt;/style&gt;<br>
+&lt;/head&gt;<br>
+&lt;body&gt;<br>
+&nbsp; &lt;div id="scanText"&gt;&#1053;&#1072;&#1074;&#1077;&#1076;&#1080; &#1085;&#1072; &#1079;&#1086;&#1073;&#1088;&#1072;&#1078;&#1077;&#1085;&#1085;&#1103;&lt;/div&gt;<br>
+<br>
+&nbsp; &lt;a-scene embedded id="arScene" arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best;"&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;a-marker id="marker" type="pattern" url="marker.patt"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- PNG &#1082;&#1072;&#1088;&#1090;&#1080;&#1085;&#1082;&#1072; --&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a-image id="arImage" src="image.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1"&gt;&lt;/a-image&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- &#1040;&#1091;&#1076;&#1110;&#1086; --&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a-entity id="arAudio" sound="src: url(audio.mp3); autoplay: false; loop: false"&gt;&lt;/a-entity&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/a-marker&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;a-entity camera&gt;&lt;/a-entity&gt;<br>
+&nbsp; &lt;/a-scene&gt;<br>
+<br>
+&nbsp; &lt;a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&amp;si=IyXv1SkdPyvhcW7Z"<br>
+&nbsp;&nbsp;&nbsp;&nbsp; id="smartLessaBtn" target="_blank"&gt;@SmartLessa&lt;/a&gt;<br>
+<br>
+&nbsp; &lt;script&gt;<br>
+&nbsp;&nbsp;&nbsp; const marker = document.getElementById('marker');<br>
+&nbsp;&nbsp;&nbsp; const scanText = document.getElementById('scanText');<br>
+&nbsp;&nbsp;&nbsp; const arAudio = document.querySelector('#arAudio');<br>
+<br>
+&nbsp;&nbsp;&nbsp; marker.addEventListener('markerFound', () =&gt; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scanText.style.display = 'none';<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arAudio.components.sound.playSound();<br>
+&nbsp;&nbsp;&nbsp; });<br>
+<br>
+&nbsp;&nbsp;&nbsp; marker.addEventListener('markerLost', () =&gt; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scanText.style.display = 'block';<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arAudio.components.sound.stopSound();<br>
+&nbsp;&nbsp;&nbsp; });<br>
+<br>
+&nbsp;&nbsp;&nbsp; function fixHeight() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; document.body.style.height = window.innerHeight + 'px';<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; window.addEventListener('resize', fixHeight);<br>
+&nbsp;&nbsp;&nbsp; fixHeight();<br>
+&nbsp; &lt;/script&gt;<br>
+&lt;/body&gt;<br>
+&lt;/html&gt;<br>
+</div>
+</body>
+</html>
