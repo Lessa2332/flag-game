@@ -92,7 +92,7 @@
 
   <a-scene
     embedded
-    arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;"
+    arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: true; emitevents: true;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
     id="arScene"
@@ -123,17 +123,19 @@
     arScene.addEventListener('loaded', () => {
       isInitialized = true;
       scanText.style.display = 'block';
-      checkPosition(); // Перевіряємо позиції після ініціалізації
+      console.log("Сцена ініціалізована, камера має бути активна.");
     });
 
     // Події маркера
     marker.addEventListener('markerFound', () => {
       scanText.style.display = 'block'; // Показуємо підказку при знаходженні маркера
+      console.log("Маркер знайдено, камера працює.");
     });
 
     marker.addEventListener('markerLost', () => {
       scanText.style.display = 'block'; // Показуємо підказку при втраті маркера
       document.getElementById('success-screen').style.display = 'none'; // Ховаємо екран успіху
+      console.log("Маркер втрачено.");
     });
 
     function checkPosition() {
@@ -144,7 +146,10 @@
       const targetBlue = document.getElementById('target-blue');
       const targetYellow = document.getElementById('target-yellow');
 
-      if (!blue || !yellow || !targetBlue || !targetYellow) return;
+      if (!blue || !yellow || !targetBlue || !targetYellow) {
+        console.log("Елементи не знайдено.");
+        return;
+      }
 
       const posBlue = blue.object3D.position;
       const posYellow = yellow.object3D.position;
@@ -154,11 +159,14 @@
       const distBlue = posBlue.distanceTo(posTgtBlue);
       const distYellow = posYellow.distanceTo(posTgtYellow);
 
+      console.log(`Дистанція: блакитний=${distBlue.toFixed(2)}, жовтий=${distYellow.toFixed(2)}`);
+
       if (distBlue < 0.3 && distYellow < 0.3) {
         scanText.style.display = 'none';
         document.getElementById('success-screen').style.display = 'flex';
         const sound = document.getElementById('success-sound');
         sound.play().catch(e => console.log("Звук заблоковано", e));
+        console.log("Успіх! Блоки на місці.");
       }
     }
 
@@ -173,50 +181,12 @@
       document.getElementById('success-screen').style.display = 'none';
       scanText.style.display = 'block';
 
-      // Перезавантажуємо сцену для повторної ініціалізації камери
-      arScene.parentNode.removeChild(arScene);
-      const newScene = document.createElement('a-scene');
-      newScene.setAttribute('embedded', '');
-      newScene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;');
-      newScene.setAttribute('vr-mode-ui', 'enabled: false');
-      newScene.setAttribute('device-orientation-permission-ui', 'enabled: true');
-      newScene.setAttribute('id', 'arScene');
-      document.body.appendChild(newScene);
-
-      // Копіюємо камеру та маркер у нову сцену
-      const camera = document.createElement('a-camera');
-      camera.setAttribute('rotation-reader', '');
-      camera.setAttribute('arjs-camera', '');
-      camera.setAttribute('video-src', 'default-camera');
-      const marker = document.createElement('a-marker');
-      marker.setAttribute('preset', 'hiro');
-      marker.innerHTML = `
-        <a-box id="blue-part" position="0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#0057b7" class="aframe-draggable"></a-box>
-        <a-box id="yellow-part" position="-0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#ffd700" class="aframe-draggable"></a-box>
-        <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
-        <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
-      `;
-      newScene.appendChild(camera);
-      newScene.appendChild(marker);
-
-      // Повторна ініціалізація скриптів
-      setTimeout(() => {
-        initGame(newScene.querySelector('a-marker'));
-      }, 100);
-    }
-
-    function initGame(markerElement) {
-      markerElement.addEventListener('markerFound', () => {
-        scanText.style.display = 'block';
-      });
-
-      markerElement.addEventListener('markerLost', () => {
-        scanText.style.display = 'block';
-        document.getElementById('success-screen').style.display = 'none';
-      });
-
-      document.addEventListener('dragend', () => setTimeout(checkPosition, 100));
-      setInterval(checkPosition, 300);
+      // Спробуємо переініціалізувати камеру
+      const camera = document.querySelector('a-camera');
+      if (camera) {
+        camera.components['arjs-camera'].initCamera();
+        console.log("Спроба переініціалізації камери.");
+      }
     }
 
     // Фікс висоти для мобільних
@@ -228,4 +198,4 @@
   </script>
 
 </body>
-</html
+</html>
