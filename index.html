@@ -3,31 +3,15 @@
 <html lang="uk" allow="camera">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Склади прапор України</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Склади прапор</title>
 
-  <!-- ✅ Виправлені посилання (без пробілів) -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+  <!-- 🔥 Використовуємо unpkg — надійніше -->
+  <script src="https://unpkg.com/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      touch-action: none;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: transparent;
-    }
-    a-scene {
-      width: 100% !important;
-      height: 100% !important;
-      position: fixed;
-      top: 0; left: 0;
-    }
     .overlay {
       position: fixed;
       top: 50%;
@@ -38,95 +22,63 @@
       font-weight: bold;
       text-shadow: 2px 2px 6px #000;
       z-index: 10;
-      text-align: center;
-      width: 90%;
     }
     #success-screen {
       display: none;
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, #ffecb3, #ffd54f);
-      display: flex;
-      flex-direction: column;
+      background: #fff3e0;
       justify-content: center;
       align-items: center;
       text-align: center;
       z-index: 100;
-    }
-    #success-screen h1 {
-      font-size: 40px;
-      color: #1565c0;
-      animation: pop-in 1s;
-      margin: 10px 0;
-    }
-    .star-animation {
-      font-size: 80px;
-      animation: float 2s infinite alternate, spin 4s linear infinite;
-    }
-    button {
-      margin-top: 30px;
-      padding: 15px 40px;
-      font-size: 24px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-    }
-    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
-    @media (max-width: 600px) {
-      .overlay { font-size: 1.5em; }
+      display: flex;
+      flex-direction: column;
     }
   </style>
 </head>
 <body>
 
-  <div class="overlay">📱 Наведи на маркер! Дозволь камеру.</div>
+  <div class="overlay">📱 Перетягни блоки, щоб скласти прапор!</div>
 
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
-    <div class="star-animation">✨ 🌟 ✨</div>
-    <p style="font-size: 24px;">Ти склав(ла) прапор України! 🇺🇦</p>
-    <button onclick="resetGame()">Спробувати ще раз</button>
+    <p>Ти склав(ла) прапор України! 🇺🇦</p>
+    <button onclick="resetGame()">Ще раз</button>
   </div>
 
-  <!-- ✅ Виправлено: emitevents, a-camera, video-src -->
   <a-scene
     embedded
-    arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;"
+    cursor="rayOrigin: mouse"
+    arjs="trackingMethod: best; debugUIEnabled: false; emitevents: true;"
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true"
   >
-    <a-camera
-      rotation-reader
-      arjs-camera
-      video-src="default-camera"
-    ></a-camera>
+    <a-camera rotation-reader arjs-camera></a-camera>
 
     <a-marker preset="hiro">
-      <a-box id="blue-part" position="0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#0057b7" class="aframe-draggable"></a-box>
-      <a-box id="yellow-part" position="-0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#ffd700" class="aframe-draggable"></a-box>
-      <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
-      <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
+      <a-box
+        id="blue-part"
+        position="0.5 0.5 0"
+        width="1" height="0.3" depth="0.1"
+        color="#0057b7"
+        class="aframe-draggable"
+      ></a-box>
+
+      <a-box
+        id="yellow-part"
+        position="-0.5 0.5 0"
+        width="1" height="0.3" depth="0.1"
+        color="#ffd700"
+        class="aframe-draggable"
+      ></a-box>
+
+      <!-- Ціль — по центру -->
+      <a-plane id="target-blue" visible="false" position="0 0.15 0" width="1.2" height="0.4"></a-plane>
+      <a-plane id="target-yellow" visible="false" position="0 -0.15 0" width="1.2" height="0.4"></a-plane>
     </a-marker>
   </a-scene>
 
-  <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
-
   <script>
-    const scanText = document.querySelector('.overlay');
-
-    // Події маркера
-    document.querySelector('a-marker').addEventListener('markerFound', () => {
-      scanText.style.display = 'none';
-    });
-
-    document.querySelector('a-marker').addEventListener('markerLost', () => {
-      scanText.style.display = 'block';
-    });
-
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -144,14 +96,11 @@
       const distYellow = posYellow.distanceTo(posTgtYellow);
 
       if (distBlue < 0.2 && distYellow < 0.2) {
-        scanText.style.display = 'none';
+        document.querySelector('.overlay').style.display = 'none';
         document.getElementById('success-screen').style.display = 'flex';
-        const sound = document.getElementById('success-sound');
-        sound.play().catch(e => console.log("Звук заблоковано", e));
       }
     }
 
-    // Перевірка позиції
     document.addEventListener('dragend', () => setTimeout(checkPosition, 100));
     setInterval(checkPosition, 300);
 
@@ -159,7 +108,7 @@
       document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
       document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
       document.getElementById('success-screen').style.display = 'none';
-      scanText.style.display = 'block';
+      document.querySelector('.overlay').style.display = 'block';
     }
   </script>
 
