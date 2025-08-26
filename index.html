@@ -110,7 +110,6 @@
     <a-camera
       rotation-reader
       arjs-camera
-      video-src="default-camera"
     ></a-camera>
 
     <a-marker preset="hiro">
@@ -128,20 +127,38 @@
     const marker = document.querySelector('a-marker');
     const arScene = document.getElementById('arScene');
     let selectedColors = [];
+    let isCameraReady = false;
+
+    // Перевірка доступу до камери
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        stream.getTracks().forEach(track => track.stop());
+        isCameraReady = true;
+        console.log("Доступ до камери надано.");
+      } catch (err) {
+        console.error("Помилка доступу до камери:", err);
+        alert("Будь ласка, дозвольте доступ до камери в налаштуваннях браузера.");
+      }
+    }
 
     // Ініціалізація після завантаження сцени
     arScene.addEventListener('loaded', () => {
-      scanText.style.display = 'block';
-      document.getElementById('success-screen').style.display = 'none';
-      console.log("Сцена ініціалізована.");
+      initCamera().then(() => {
+        scanText.style.display = 'block';
+        document.getElementById('success-screen').style.display = 'none';
+        console.log("Сцена ініціалізована, камера готова.");
+      });
     });
 
     // Події маркера
     marker.addEventListener('markerFound', () => {
-      scanText.style.display = 'block';
-      document.querySelectorAll('.color-option').forEach(option => option.setAttribute('visible', true));
-      selectedColors = []; // Скидаємо вибір при знаходженні маркера
-      console.log("Маркер знайдено.");
+      if (isCameraReady) {
+        scanText.style.display = 'block';
+        document.querySelectorAll('.color-option').forEach(option => option.setAttribute('visible', true));
+        selectedColors = []; // Скидаємо вибір при знаходженні маркера
+        console.log("Маркер знайдено.");
+      }
     });
 
     marker.addEventListener('markerLost', () => {
@@ -152,6 +169,8 @@
 
     // Обробка вибору кольору
     arScene.addEventListener('chooseColor', (e) => {
+      if (!isCameraReady) return;
+
       const color = e.detail.data;
       selectedColors.push(color);
       console.log(`Обрано колір: ${color}, послідовність: ${selectedColors}`);
