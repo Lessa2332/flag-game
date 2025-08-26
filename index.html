@@ -1,114 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>notepad</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Склади прапор України</title>
+
+  <!-- A-Frame + AR.js -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #e0f7fa;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    #ui-overlay {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      color: #1565c0;
+      font-size: 24px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #success-screen {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #ffecb3, #ffd54f);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 100;
+    }
+
+    #success-screen h1 {
+      font-size: 40px;
+      color: #1565c0;
+      animation: pop-in 1s;
+    }
+
+    .star-animation {
+      font-size: 80px;
+      animation: float 2s infinite alternate, spin 4s linear infinite;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 24px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-20px); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pop-in {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
-<style type="text/css">
-ol,ul{
-display:block;
-list-style-type:none;
-margin:3px;
-}
-</style><body>
-<div>&lt;!DOCTYPE html&gt;<br>
-&lt;html lang="uk"&gt;<br>
-&lt;head&gt;<br>
-&nbsp; &lt;meta charset="utf-8"&gt;<br>
-&nbsp; &lt;meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;<br>
-&nbsp; &lt;title&gt;AR &#1050;&#1072;&#1084;&#1077;&#1088;&#1072;&lt;/title&gt;<br>
-&nbsp; &lt;script src="https://aframe.io/releases/1.6.0/aframe.min.js"&gt;&lt;/script&gt;<br>
-&nbsp; &lt;script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"&gt;&lt;/script&gt;<br>
-&nbsp; &lt;style&gt;<br>
-&nbsp;&nbsp;&nbsp; html, body {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; margin: 0;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; padding: 0;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 100%;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; height: 100%;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; overflow: hidden;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; touch-action: none;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-family: Arial, sans-serif;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; a-scene {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 100% !important;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; height: 100% !important;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; top: 0;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 0;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; #scanText {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; top: 50%;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 50%;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; transform: translate(-50%, -50%);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color: #FFD700;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-size: 2em;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-weight: bold;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-shadow: 2px 2px 6px #000;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; z-index: 10;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-align: center;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; width: 90%;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; #smartLessaBtn {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; position: fixed;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bottom: 20px;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; left: 50%;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; transform: translateX(-50%);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; background: #ff0044;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color: white;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; padding: 14px 24px;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; border-radius: 30px;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-size: 1.1em;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; font-weight: bold;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-decoration: none;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; z-index: 10;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; box-shadow: 0 4px 8px rgba(0,0,0,0.3);<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; #smartLessaBtn:hover {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; background: #cc0036;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp; &lt;/style&gt;<br>
-&lt;/head&gt;<br>
-&lt;body&gt;<br>
-&nbsp; &lt;div id="scanText"&gt;&#1053;&#1072;&#1074;&#1077;&#1076;&#1080; &#1085;&#1072; &#1079;&#1086;&#1073;&#1088;&#1072;&#1078;&#1077;&#1085;&#1085;&#1103;&lt;/div&gt;<br>
-<br>
-&nbsp; &lt;a-scene embedded id="arScene" arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best;"&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;a-marker id="marker" type="pattern" url="marker.patt"&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- PNG &#1082;&#1072;&#1088;&#1090;&#1080;&#1085;&#1082;&#1072; --&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a-image id="arImage" src="image.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1"&gt;&lt;/a-image&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- &#1040;&#1091;&#1076;&#1110;&#1086; --&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a-entity id="arAudio" sound="src: url(audio.mp3); autoplay: false; loop: false"&gt;&lt;/a-entity&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;/a-marker&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;a-entity camera&gt;&lt;/a-entity&gt;<br>
-&nbsp; &lt;/a-scene&gt;<br>
-<br>
-&nbsp; &lt;a href="https://youtube.com/playlist?list=PL6UDFwT9TzFxsVdFiEBsQ9yFpcYRPOpfO&amp;si=IyXv1SkdPyvhcW7Z"<br>
-&nbsp;&nbsp;&nbsp;&nbsp; id="smartLessaBtn" target="_blank"&gt;@SmartLessa&lt;/a&gt;<br>
-<br>
-&nbsp; &lt;script&gt;<br>
-&nbsp;&nbsp;&nbsp; const marker = document.getElementById('marker');<br>
-&nbsp;&nbsp;&nbsp; const scanText = document.getElementById('scanText');<br>
-&nbsp;&nbsp;&nbsp; const arAudio = document.querySelector('#arAudio');<br>
-<br>
-&nbsp;&nbsp;&nbsp; marker.addEventListener('markerFound', () =&gt; {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scanText.style.display = 'none';<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arAudio.components.sound.playSound();<br>
-&nbsp;&nbsp;&nbsp; });<br>
-<br>
-&nbsp;&nbsp;&nbsp; marker.addEventListener('markerLost', () =&gt; {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scanText.style.display = 'block';<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arAudio.components.sound.stopSound();<br>
-&nbsp;&nbsp;&nbsp; });<br>
-<br>
-&nbsp;&nbsp;&nbsp; function fixHeight() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; document.body.style.height = window.innerHeight + 'px';<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; window.addEventListener('resize', fixHeight);<br>
-&nbsp;&nbsp;&nbsp; fixHeight();<br>
-&nbsp; &lt;/script&gt;<br>
-&lt;/body&gt;<br>
-&lt;/html&gt;<br>
-</div>
+<body>
+
+  <!-- ПОВІДОМЛЕННЯ НА ЕКРАНІ -->
+  <div id="ui-overlay">Перетягни блоки, щоб скласти прапор!</div>
+
+  <!-- ЕКРАН УСПІХУ -->
+  <div id="success-screen">
+    <h1>🎉 Вітаю тебе!</h1>
+    <div class="star-animation">✨ 🌟 ✨</div>
+    <p>Ти склав(ла) прапор України! 🇺🇦</p>
+    <button onclick="resetGame()">Спробувати ще раз</button>
+  </div>
+
+  <!-- AR СЦЕНА -->
+  <a-scene embedded arjs="trackingMethod: best; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-marker preset="hiro">
+      <!-- Синій блок (горизонт) -->
+      <a-box id="blue-part"
+             position="0.5 0.5 0"
+             width="1" height="0.3" depth="0.1"
+             color="#0057b7"
+             draggable></a-box>
+
+      <!-- Жовтий блок (горизонт) -->
+      <a-box id="yellow-part"
+             position="-0.5 0.5 0"
+             width="1" height="0.3" depth="0.1"
+             color="#ffd700"
+             draggable></a-box>
+
+      <!-- Правильні позиції для прапора -->
+      <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
+      <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
+    </a-marker>
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- Аудіо (не обов'язково) -->
+  <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
+
+  <script>
+    // Додаємо можливість перетягування
+    AFRAME.registerComponent('draggable', {
+      init: function () {
+        this.el.addEventListener('dragstart', () => {
+          this.el.setAttribute('material', 'opacity', 0.8);
+        });
+        this.el.addEventListener('dragend', () => {
+          this.el.setAttribute('material', 'opacity', 1);
+          checkPosition();
+        });
+      }
+    });
+
+    // Перевірка, чи блоки на своїх місцях
+    function checkPosition() {
+      const blue = document.getElementById('blue-part');
+      const yellow = document.getElementById('yellow-part');
+      const targetBlue = document.getElementById('target-blue');
+      const targetYellow = document.getElementById('target-yellow');
+
+      const posBlue = blue.object3D.position;
+      const posYellow = yellow.object3D.position;
+      const posTgtBlue = targetBlue.object3D.position;
+      const posTgtYellow = targetYellow.object3D.position;
+
+      const distBlue = posBlue.distanceTo(posTgtBlue);
+      const distYellow = posYellow.distanceTo(posTgtYellow);
+
+      // Якщо обидва блоки близько до своїх цілей
+      if (distBlue < 0.2 && distYellow < 0.2) {
+        document.getElementById('success-screen').style.display = 'flex';
+        document.getElementById('success-sound').play();
+      }
+    }
+
+    // Повернути гру
+    function resetGame() {
+      document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
+      document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
+      document.getElementById('success-screen').style.display = 'none';
+    }
+
+    // Додаємо draggable до A-Frame
+    if (typeof AFRAME !== 'undefined') {
+      AFRAME.registerComponent('draggable', {
+        init: function () {
+          this.draggable = true;
+          this.el.setAttribute('class', 'aframe-draggable');
+        }
+      });
+    }
+  </script>
+
+  <!-- Підключаємо aframe-extras для drag & drop -->
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 </body>
 </html>
