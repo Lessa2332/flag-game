@@ -3,44 +3,45 @@
 <html lang="uk" allow="camera *">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Склади прапор України</title>
 
-  <!-- CDN: стабільні посилання -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
+  <!-- Використовую ваші версії бібліотек -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: transparent; /* Прибрано блакитний фон */
-    }
-
-    .overlay {
-      position: absolute;
-      top: 20px;
       width: 100%;
-      text-align: center;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      pointer-events: none;
-      z-index: 10;
-      background: rgba(0, 0, 0, 0.5); /* Легкий фон для читабельності */
-      border: none;
-      box-shadow: none;
-      text-shadow:
-        -1px -1px 0 #000,
-         1px -1px 0 #000,
-        -1px  1px 0 #000,
-         1px  1px 0 #000,
-         0    0   4px #000;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: transparent;
     }
-
+    a-scene {
+      width: 100% !important;
+      height: 100% !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+    .overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #FFD700;
+      font-size: 2em;
+      font-weight: bold;
+      text-shadow: 2px 2px 6px #000;
+      z-index: 10;
+      text-align: center;
+      width: 90%;
+    }
     #success-screen {
       display: none;
       position: absolute;
@@ -52,19 +53,16 @@
       text-align: center;
       z-index: 100;
     }
-
     #success-screen h1 {
       font-size: 40px;
       color: #1565c0;
       animation: pop-in 1s;
       margin: 10px 0;
     }
-
     .star-animation {
       font-size: 80px;
       animation: float 2s infinite alternate, spin 4s linear infinite;
     }
-
     button {
       margin-top: 30px;
       padding: 15px 40px;
@@ -75,19 +73,17 @@
       border-radius: 30px;
       cursor: pointer;
     }
-
     @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
-
     @media (max-width: 600px) {
-      .overlay { font-size: 20px; }
+      .overlay { font-size: 1.5em; }
     }
   </style>
 </head>
 <body>
 
-  <div class="overlay">📱 Наведи на маркер Hiro! Дозволь доступ до камери в налаштуваннях браузера[](https://yourusername.github.io/...).</div>
+  <div class="overlay">📱 Наведи на маркер! Дозволь камеру в налаштуваннях.</div>
   <div id="success-screen">
     <h1>🎉 Вітаю тебе!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
@@ -95,14 +91,9 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <a-scene
-    embedded
-    arjs="trackingMethod: best; debugUIEnabled: true; sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true"
-  >
-    <a-camera rotation-reader arjs-camera></a-camera>
-    <a-marker preset="hiro">
+  <a-scene embedded id="arScene" arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best;">
+    <a-entity camera></a-entity>
+    <a-marker id="marker" preset="hiro">
       <a-box id="blue-part" position="0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#0057b7" class="aframe-draggable"></a-box>
       <a-box id="yellow-part" position="-0.5 0.5 0" width="1" height="0.3" depth="0.1" color="#ffd700" class="aframe-draggable"></a-box>
       <a-plane id="target-blue" visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
@@ -113,6 +104,19 @@
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
+    const marker = document.getElementById('marker');
+    const scanText = document.querySelector('.overlay');
+    const arScene = document.getElementById('arScene');
+
+    marker.addEventListener('markerFound', () => {
+      scanText.style.display = 'none';
+      arScene.setAttribute('arjs', 'debugUIEnabled', true); // Увімкнути відладку
+    });
+
+    marker.addEventListener('markerLost', () => {
+      scanText.style.display = 'block';
+    });
+
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -146,28 +150,12 @@
       document.querySelector('.overlay').style.display = 'block';
     }
 
-    (async () => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Ваш пристрій або браузер не підтримує доступ до камери. Спробуйте Chrome на GitHub Pages.");
-        return;
-      }
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        stream.getTracks().forEach(track => track.stop());
-        console.log("Камера активована. Наведіть на маркер Hiro!");
-      } catch (err) {
-        console.warn("Помилка доступу до камери:", err);
-        alert("Дозвольте доступ до камери в налаштуваннях браузера для " + window.location.href);
-      }
-    })();
-
-    window.addEventListener('load', () => {
-      console.log("Сторінка завантажена на: " + window.location.href + ". Перевірте консоль на помилки!");
-      if (!document.querySelector('a-scene').components.arjs) {
-        console.error("AR.js не ініціалізовано. Перевірте підключення бібліотек або мережу!");
-      }
-    });
+    // Фікс висоти для мобільних
+    function fixHeight() {
+      document.body.style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('resize', fixHeight);
+    fixHeight();
   </script>
 
 </body>
