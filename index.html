@@ -1,31 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Склади прапор України</title>
 
+  <!-- Важливо: використовуємо CDN, щоб GitHub Pages не блокував -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 
-      // Якщо обидва блоки близько до своїх цілей
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #e0f7fa;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    #ui-overlay {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      color: #1565c0;
+      font-size: 24px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #success-screen {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #ffecb3, #ffd54f);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 100;
+    }
+
+    #success-screen h1 {
+      font-size: 40px;
+      color: #1565c0;
+      animation: pop-in 1s;
+    }
+
+    .star-animation {
+      font-size: 80px;
+      animation: float 2s infinite alternate, spin 4s linear infinite;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 24px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-20px); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pop-in {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ПОДСКАЗКА НА ЕКРАНІ -->
+  <div id="ui-overlay">📱 Наведи камеру на маркер Hiro!</div>
+
+  <!-- ЕКРАН УСПІХУ -->
+  <div id="success-screen">
+    <h1>🎉 Вітаю тебе!</h1>
+    <div class="star-animation">✨ 🌟 ✨</div>
+    <p style="font-size: 24px; max-width: 500px;">Ти склав(ла) прапор України! 🇺🇦</p>
+    <button onclick="resetGame()">Спробувати ще раз</button>
+  </div>
+
+  <!-- AR СЦЕНА -->
+  <a-scene
+    embedded
+    arjs="trackingMethod: best; debugUIEnabled: false; canvasWidth: 480; canvasHeight: 640;"
+    vr-mode-ui="enabled: false"
+  >
+    <a-marker preset="hiro">
+      <!-- Блоки прапора -->
+      <a-box
+        id="blue-part"
+        position="0.5 0.5 0"
+        width="1" height="0.3" depth="0.1"
+        color="#0057b7"
+        class="aframe-draggable"
+      ></a-box>
+
+      <a-box
+        id="yellow-part"
+        position="-0.5 0.5 0"
+        width="1" height="0.3" depth="0.1"
+        color="#ffd700"
+        class="aframe-draggable"
+      ></a-box>
+
+      <!-- Приховані цілі -->
+      <a-plane id="target-blue"  visible="false" position="0 0.3 0" width="1.2" height="0.4"></a-plane>
+      <a-plane id="target-yellow" visible="false" position="0 -0.1 0" width="1.2" height="0.4"></a-plane>
+    </a-marker>
+
+    <!-- Камера -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- Звук успіху -->
+  <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
+
+  <script>
+    // Перевірка, чи блоки на місці
+    function checkPosition() {
+      const blue = document.getElementById('blue-part');
+      const yellow = document.getElementById('yellow-part');
+      const targetBlue = document.getElementById('target-blue');
+      const targetYellow = document.getElementById('target-yellow');
+
+      if (!blue || !yellow || !targetBlue || !targetYellow) return;
+
+      const posBlue = blue.object3D.position;
+      const posYellow = yellow.object3D.position;
+      const posTgtBlue = targetBlue.object3D.position;
+      const posTgtYellow = targetYellow.object3D.position;
+
+      const distBlue = posBlue.distanceTo(posTgtBlue);
+      const distYellow = posYellow.distanceTo(posTgtYellow);
+
       if (distBlue < 0.2 && distYellow < 0.2) {
+        document.getElementById('ui-overlay').style.display = 'none';
         document.getElementById('success-screen').style.display = 'flex';
         document.getElementById('success-sound').play();
       }
     }
 
-    // Повернути гру
+    // Додаємо можливість перетягування
+    document.addEventListener('dragend', () => {
+      setTimeout(checkPosition, 100);
+    });
+
+    // Оновлюємо позицію кожні 500 мс
+    setInterval(checkPosition, 500);
+
+    // Спробувати ще раз
     function resetGame() {
       document.getElementById('blue-part').setAttribute('position', '0.5 0.5 0');
       document.getElementById('yellow-part').setAttribute('position', '-0.5 0.5 0');
       document.getElementById('success-screen').style.display = 'none';
+      document.getElementById('ui-overlay').style.display = 'block';
     }
 
-    // Додаємо draggable до A-Frame
-    if (typeof AFRAME !== 'undefined') {
-      AFRAME.registerComponent('draggable', {
-        init: function () {
-          this.draggable = true;
-          this.el.setAttribute('class', 'aframe-draggable');
-        }
-      });
-    }
+    // Додаємо draggable після завантаження A-Frame
+    window.addEventListener('aframeSceneLoaded', () => {
+      console.log('A-Frame завантажено');
+    });
   </script>
 
-  <!-- Підключаємо aframe-extras для drag & drop -->
-  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 </body>
 </html>
