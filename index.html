@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Склади прапор України 🇺🇦</title>
 
-  <!-- 🔧 Виправлені посилання (без пробілів) -->
+  <!-- Скрипти AR -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
-  <!-- 🖱️ Додано компонент для перетягування -->
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/components/aframe-ar-draggable.js"></script>
 
   <style>
+    /* 🔍 Повна прозорість сторінки */
     html, body {
       margin: 0;
       padding: 0;
@@ -20,31 +20,50 @@
       overflow: hidden;
       touch-action: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: transparent;
+      background: transparent; /* 🔴 ВАЖЛИВО: без кольору */
+      color: white;
     }
+
+    /* 🔍 Прозорість для a-scene */
     a-scene {
       width: 100% !important;
       height: 100% !important;
       position: fixed;
       top: 0; left: 0;
+      background: transparent; /* 🔴 Щоб не було білого фону при завантаженні */
     }
+
+    /* ✅ Прозорий оверлей — лише текст із тінню */
     .overlay {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #FFD700;
       font-size: 1.8em;
       font-weight: bold;
-      text-shadow: 2px 2px 8px #000;
-      z-index: 10;
       text-align: center;
       width: 90%;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 20px;
-      border-radius: 20px;
-      backdrop-filter: blur(5px);
+      z-index: 10;
+      color: #FFD700; /* жовтий — добре видно */
+      text-shadow: 
+        0 0 5px black, 
+        0 0 10px black, 
+        2px 2px 6px black; /* потужна тінь для читабельності на будь-якому тлі */
+      pointer-events: none; /* щоб не заважав тачам */
+      background: none; /* ❌ НЕМАЄ ФОНУ */
+      border: none;
+      padding: 0;
     }
+
+    /* ✅ Текст для мобільних */
+    @media (max-width: 600px) {
+      .overlay {
+        font-size: 1.5em;
+        line-height: 1.4;
+      }
+    }
+
+    /* 🎉 Екран перемоги — залишається, бо це фінальний екран */
     #success-screen {
       display: none;
       position: absolute;
@@ -84,12 +103,13 @@
       border-radius: 50px;
       cursor: pointer;
       box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-      transition: all 0.3s;
     }
     button:hover {
       background: #45a049;
       transform: scale(1.05);
     }
+
+    /* Анімації */
     @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-25px) rotate(10deg); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes pop-in {
@@ -97,21 +117,18 @@
       60% { transform: scale(1.1); }
       100% { opacity: 1; transform: scale(1); }
     }
-    @media (max-width: 600px) {
-      .overlay { font-size: 1.4em; }
-      #success-screen h1 { font-size: 2.5em; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- 📣 Оновлений текст з інструкцією -->
+  <!-- ✅ Прозорий текст: тільки текст із тінню, без фону -->
   <div class="overlay">
     🔍 Наведи камеру на маркер<br>
-    <strong>👆 Перетягни блоки, щоб скласти прапор України!</strong>
+    <span style="color: white; font-size: 0.9em;">(наприклад, квадрат Hiro)</span><br>
+    <strong style="color: #FFD700;">👆 Перетягни блоки, щоб скласти прапор!</strong>
   </div>
 
-  <!-- 🎉 Святковий екран успіху -->
+  <!-- 🎉 Екран перемоги (з'являється після збору) -->
   <div id="success-screen">
     <h1>🎉 Вітаю, Герое!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
@@ -119,12 +136,13 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- 🌐 AR сцена -->
+  <!-- 🌐 AR сцена — прозора, показує світ крізь камеру -->
   <a-scene
     embedded
     arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
+    background="color: transparent"
   >
     <a-camera
       rotation-reader
@@ -132,9 +150,8 @@
       video-src="default-camera"
     ></a-camera>
 
-    <!-- 🇺🇦 Маркер з блоками (збільшено в 2 рази) -->
+    <!-- Блоки прапора (збільшені в 2 рази) -->
     <a-marker preset="hiro">
-      <!-- Блоки тепер 2x більші: width="2", height="0.6" -->
       <a-box 
         id="blue-part" 
         position="1 0 0" 
@@ -143,9 +160,7 @@
         depth="0.1" 
         color="#0057b7" 
         ar-draggable="plane: xz"
-        animation="property: position; to: 0 0.3 0; startEvents: dragstart; dur: 300; easing: ease-out"
       ></a-box>
-
       <a-box 
         id="yellow-part" 
         position="-1 0 0" 
@@ -154,16 +169,14 @@
         depth="0.1" 
         color="#ffd700" 
         ar-draggable="plane: xz"
-        animation="property: position; to: 0 -0.3 0; startEvents: dragstart; dur: 300; easing: ease-out"
       ></a-box>
-
-      <!-- 🎯 Цільові площини — щільно одна до одної (як прапор) -->
+      <!-- Цілі -->
       <a-plane id="target-blue" visible="false" position="0 0.3 0" width="2.2" height="0.65"></a-plane>
       <a-plane id="target-yellow" visible="false" position="0 -0.3 0" width="2.2" height="0.65"></a-plane>
     </a-marker>
   </a-scene>
 
-  <!-- 🔊 Звук перемоги -->
+  <!-- Звук -->
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
@@ -171,7 +184,7 @@
     const successScreen = document.getElementById('success-screen');
     const successSound = document.getElementById('success-sound');
 
-    // 🔊 Розблокування звуку після кліку
+    // Розблокування звуку
     document.body.addEventListener('click', () => {
       successSound.play().then(() => successSound.pause()).catch(() => {});
     }, { once: true });
@@ -186,7 +199,7 @@
       successScreen.style.display = 'none';
     });
 
-    // Перевірка, чи блоки на своїх місцях
+    // Перевірка позицій
     function checkPosition() {
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
@@ -210,7 +223,6 @@
       }
     }
 
-    // Перевірка кожні 300мс
     setInterval(checkPosition, 300);
 
     function resetGame() {
@@ -223,4 +235,3 @@
 
 </body>
 </html>
-
