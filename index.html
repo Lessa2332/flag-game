@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Склади прапор України 🇺🇦</title>
 
-  <!-- Скрипти AR -->
+  <!-- AR.js + A-Frame (без video-src) -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.0/aframe/build/aframe-ar.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/components/aframe-ar-draggable.js"></script>
 
   <style>
-    /* 🔍 Повна прозорість сторінки */
+    /* Повна прозорість — видно світ крізь камеру */
     html, body {
       margin: 0;
       padding: 0;
@@ -20,20 +20,19 @@
       overflow: hidden;
       touch-action: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: transparent; /* 🔴 ВАЖЛИВО: без кольору */
+      background: transparent;
       color: white;
     }
 
-    /* 🔍 Прозорість для a-scene */
     a-scene {
       width: 100% !important;
       height: 100% !important;
       position: fixed;
       top: 0; left: 0;
-      background: transparent; /* 🔴 Щоб не було білого фону при завантаженні */
+      background: transparent;
     }
 
-    /* ✅ Прозорий оверлей — лише текст із тінню */
+    /* Прозорий оверлей — тільки текст із тінню */
     .overlay {
       position: fixed;
       top: 50%;
@@ -44,18 +43,14 @@
       text-align: center;
       width: 90%;
       z-index: 10;
-      color: #FFD700; /* жовтий — добре видно */
+      color: #FFD700;
       text-shadow: 
         0 0 5px black, 
         0 0 10px black, 
-        2px 2px 6px black; /* потужна тінь для читабельності на будь-якому тлі */
-      pointer-events: none; /* щоб не заважав тачам */
-      background: none; /* ❌ НЕМАЄ ФОНУ */
-      border: none;
-      padding: 0;
+        2px 2px 8px black;
+      pointer-events: none;
     }
 
-    /* ✅ Текст для мобільних */
     @media (max-width: 600px) {
       .overlay {
         font-size: 1.5em;
@@ -63,7 +58,7 @@
       }
     }
 
-    /* 🎉 Екран перемоги — залишається, бо це фінальний екран */
+    /* Екран перемоги */
     #success-screen {
       display: none;
       position: absolute;
@@ -121,14 +116,14 @@
 </head>
 <body>
 
-  <!-- ✅ Прозорий текст: тільки текст із тінню, без фону -->
+  <!-- Інструкція — прозора, без фону -->
   <div class="overlay">
     🔍 Наведи камеру на маркер<br>
     <span style="color: white; font-size: 0.9em;">(наприклад, квадрат Hiro)</span><br>
     <strong style="color: #FFD700;">👆 Перетягни блоки, щоб скласти прапор!</strong>
   </div>
 
-  <!-- 🎉 Екран перемоги (з'являється після збору) -->
+  <!-- Екран перемоги -->
   <div id="success-screen">
     <h1>🎉 Вітаю, Герое!</h1>
     <div class="star-animation">✨ 🌟 ✨</div>
@@ -136,22 +131,22 @@
     <button onclick="resetGame()">Спробувати ще раз</button>
   </div>
 
-  <!-- 🌐 AR сцена — прозора, показує світ крізь камеру -->
+  <!-- AR Сцена -->
   <a-scene
     embedded
     arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best; debugUIEnabled: false; emitevents: true;"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: true"
-    background="color: transparent"
   >
+    <!-- ✅ Виправлено: НЕМАЄ video-src -->
     <a-camera
       rotation-reader
       arjs-camera
-      video-src="default-camera"
     ></a-camera>
 
-    <!-- Блоки прапора (збільшені в 2 рази) -->
+    <!-- Маркер Hiro -->
     <a-marker preset="hiro">
+      <!-- Блоки (збільшені в 2 рази) -->
       <a-box 
         id="blue-part" 
         position="1 0 0" 
@@ -170,13 +165,14 @@
         color="#ffd700" 
         ar-draggable="plane: xz"
       ></a-box>
-      <!-- Цілі -->
+
+      <!-- Цілі (для перевірки позиції) -->
       <a-plane id="target-blue" visible="false" position="0 0.3 0" width="2.2" height="0.65"></a-plane>
       <a-plane id="target-yellow" visible="false" position="0 -0.3 0" width="2.2" height="0.65"></a-plane>
     </a-marker>
   </a-scene>
 
-  <!-- Звук -->
+  <!-- Звук перемоги -->
   <audio id="success-sound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
 
   <script>
@@ -184,23 +180,31 @@
     const successScreen = document.getElementById('success-screen');
     const successSound = document.getElementById('success-sound');
 
-    // Розблокування звуку
+    // 🔊 Розблокування звуку після кліку
     document.body.addEventListener('click', () => {
       successSound.play().then(() => successSound.pause()).catch(() => {});
     }, { once: true });
 
-    // Події маркера
+    // 🚩 Прапор: чи знайдено маркер
+    let isMarkerFound = false;
+
+    // Подія: маркер знайдено
     document.querySelector('a-marker').addEventListener('markerFound', () => {
       scanText.style.display = 'none';
+      isMarkerFound = true;
     });
 
+    // Подія: маркер втрачено
     document.querySelector('a-marker').addEventListener('markerLost', () => {
       scanText.style.display = 'block';
       successScreen.style.display = 'none';
+      isMarkerFound = false;
     });
 
-    // Перевірка позицій
+    // Перевірка позицій — тільки якщо маркер знайдено
     function checkPosition() {
+      if (!isMarkerFound) return;
+
       const blue = document.getElementById('blue-part');
       const yellow = document.getElementById('yellow-part');
       const targetBlue = document.getElementById('target-blue');
@@ -216,22 +220,29 @@
       const distBlue = posBlue.distanceTo(posTgtBlue);
       const distYellow = posYellow.distanceTo(posTgtYellow);
 
-      if (distBlue < 0.2 && distYellow < 0.2) {
+      // Поріг зменшено для точності
+      if (distBlue < 0.15 && distYellow < 0.15) {
         successScreen.style.display = 'flex';
         successSound.currentTime = 0;
         successSound.play().catch(e => console.log("Звук не відтворено", e));
       }
     }
 
+    // Перевірка кожні 300 мс
     setInterval(checkPosition, 300);
 
+    // Скидання гри
     function resetGame() {
       document.getElementById('blue-part').setAttribute('position', '1 0 0');
       document.getElementById('yellow-part').setAttribute('position', '-1 0 0');
       successScreen.style.display = 'none';
       scanText.style.display = 'block';
+      isMarkerFound = false;
     }
   </script>
+
+</body>
+</html>
 
 </body>
 </html>
